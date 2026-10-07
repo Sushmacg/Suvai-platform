@@ -1,49 +1,47 @@
 # Python
-__pycache__/
+
+**pycache**/
 *.py[cod]
 *.pyo
 
-# Virtual environments
+# Virtual environment
 venv/
-.venv/
-env/
-
+.env
+__pycache__/
+*.pyc
 # Environment variables / secrets
+
 .env
 
+# Database
+
+*.db
+*.sqlite
+*.sqlite3
+
 # IDE
+
 .vscode/
 .idea/
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Logs
-*.log
-
-# ML artifacts
-*.pkl
-*.joblib
-app/ml/artifacts/
-
 # OS
+
 .DS_Store
 Thumbs.db
 
-# Node / React Native
-node_modules/
-.expo/
-.metro/
-*.jks
+# Logs
 
-# React Native build files
-android/.gradle/
-android/app/build/
-android/build/
-ios/build/
+*.log
 
-# General
-dist/
+# Python tools
+
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build
+
 build/
+dist/
+*.egg-info/
