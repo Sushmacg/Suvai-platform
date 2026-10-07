@@ -2,21 +2,23 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Suvai API"
-    VERSION: str = "0.1.0"
-    ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    DATABASE_URL: str
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     API_V1_PREFIX: str = "/api/v1"
+    app_name: str = "Suvai API"
+    version: str = "0.1.0"
 
-    # Origins allowed to call the API from a browser (dev defaults)
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:8081",   # Expo / Metro
-        "http://localhost:19006",  # Expo web
-        "http://localhost:3000",   # any web admin panel later
-    ]
+    environment: str = "development"
+    debug: bool = True
+    cors_origins: str = ""
 
-    # Read values from .env if it exists; ignore unknown keys
+    ADMIN_NAME: str = "Suvai Owner"
+    ADMIN_PHONE: str = ""
+    ADMIN_PASSWORD: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
