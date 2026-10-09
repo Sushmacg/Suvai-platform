@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+﻿from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -20,3 +20,14 @@ def list_users(
     db: Session = Depends(get_db),
 ):
     return db.scalars(select(User).order_by(User.created_at)).all()
+
+
+# ---- RBAC verification endpoints (safe to keep or remove later) ----
+@router.get("/admin-check")
+def admin_check(user: User = Depends(require_role("admin"))):
+    return {"message": "Admin access granted", "role": user.role}
+
+
+@router.get("/customer-check")
+def customer_check(user: User = Depends(require_role("customer"))):
+    return {"message": "Customer access granted", "role": user.role}
