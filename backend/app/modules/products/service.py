@@ -8,10 +8,19 @@ from app.modules.products.models import Product
 from app.modules.products.schemas import ProductCreate, ProductUpdate
 
 
-def list_products(db: Session, include_inactive: bool = False) -> list[Product]:
+def list_products(
+    db: Session,
+    include_inactive: bool = False,
+    available_only: bool = False,
+    category: str | None = None,
+) -> list[Product]:
     query = select(Product).order_by(Product.name)
     if not include_inactive:
         query = query.where(Product.is_active.is_(True))
+    if available_only:
+        query = query.where(Product.is_available.is_(True))
+    if category:
+        query = query.where(Product.category == category.strip().lower())
     return list(db.scalars(query).all())
 
 
@@ -40,9 +49,11 @@ def create_product(db: Session, data: ProductCreate) -> Product:
 def update_product(db: Session, product_id: uuid.UUID, data: ProductUpdate) -> Product:
     product = get_product(db, product_id, include_inactive=True)
     changes = data.model_dump(exclude_unset=True)
-    if "name" in changes and changes["name"] is not None:
+    if changes.get("name") is not None:
         _ensure_name_free(db, changes["name"], ignore_id=product.id)
     for field, value in changes.items():
+        if value is None and field in ("name", "category", "price"):
+            continue  # required fields cannot be cleared
         setattr(product, field, value)
     db.commit()
     db.refresh(product)

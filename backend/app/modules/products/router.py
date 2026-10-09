@@ -1,6 +1,6 @@
 ﻿import uuid
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db, require_role
@@ -13,8 +13,12 @@ router = APIRouter(prefix="/products", tags=["products"])
 
 # ---------- Customer (public) ----------
 @router.get("", response_model=list[ProductResponse])
-def list_menu(db: Session = Depends(get_db)):
-    return service.list_products(db)
+def list_menu(
+    available_only: bool = Query(False, description="Hide sold-out products"),
+    category: str | None = Query(None, max_length=50),
+    db: Session = Depends(get_db),
+):
+    return service.list_products(db, available_only=available_only, category=category)
 
 
 # ---------- Admin ----------
