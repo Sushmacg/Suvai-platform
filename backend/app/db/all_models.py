@@ -6,3 +6,4 @@ from app.modules.stalls.models import StallLocation, StallSession  # noqa: F401
 from app.modules.inventory.models import SessionStock  # noqa: F401
 from app.modules.orders.models import Order, OrderItem  # noqa: F401
 from app.modules.expenses.models import Expense  # noqa: F401
+from app.modules.reviews.models import Review  # noqa: F401
