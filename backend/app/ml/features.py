@@ -1,4 +1,4 @@
-﻿"""Feature engineering for Suvai demand prediction.
+"""Feature engineering for Suvai demand prediction.
 
 Pure pandas / NumPy / scikit-learn. Nothing here touches the database or FastAPI,
 so the same functions serve training, evaluation and live prediction.
@@ -205,7 +205,7 @@ def add_calendar_features(df: pd.DataFrame) -> pd.DataFrame:
     """Features known in advance for any date, so they can never leak."""
     out = df.copy()
     dates = pd.to_datetime(out["date"])
-    weekday = dates.dt.dayofweek
+    weekday = dates.dt.day_of_week
     month = dates.dt.month
 
     out["day_of_week"] = weekday.astype(int)
@@ -258,7 +258,7 @@ def add_history_features(df: pd.DataFrame, target: str = TARGET) -> pd.DataFrame
     part as rows, but contribute nothing to any average.
     """
     base = df.sort_values(SERIES_KEYS + ["date"], kind="mergesort").reset_index(drop=True)
-    base = base.assign(_weekday=base["date"].dt.dayofweek)
+    base = base.assign(_weekday=base["date"].dt.day_of_week)
     by_series = base.groupby(SERIES_KEYS, sort=False)
     by_weekday = base.groupby(SERIES_KEYS + ["_weekday"], sort=False)
 
