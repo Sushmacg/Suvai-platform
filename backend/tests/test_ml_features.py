@@ -50,7 +50,7 @@ def synthetic_daily(days=21):
             if location == "loc-b" and offset % 3 == 1 and offset != days - 1:
                 continue
             for product, base, price in (("prod-1", 10, 120.0), ("prod-2", 4, 150.0)):
-                units = base + boost + day.day_of_week
+                units = base + boost + day.dayofweek
                 rows.append(
                     {
                         "date": day,
