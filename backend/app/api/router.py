@@ -12,6 +12,8 @@ from app.modules.reviews.router import router as reviews_router
 from app.modules.event_log.router import router as event_log_router
 from app.modules.notifications.router import router as notifications_router
 
+from app.modules.forecasts.router import router as forecasts_router
+
 api_router = APIRouter(prefix=settings.API_V1_PREFIX)
 api_router.include_router(auth_router)
 api_router.include_router(users_router)
@@ -40,3 +42,4 @@ def health_check():
 # api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
 from app.modules.analytics.router import router as analytics_router
 api_router.include_router(analytics_router)
+api_router.include_router(forecasts_router)
