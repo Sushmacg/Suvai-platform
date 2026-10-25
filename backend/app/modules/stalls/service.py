@@ -1,4 +1,4 @@
-﻿import math
+import math
 import uuid
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
@@ -8,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.events import bus
+from app.modules.stalls.events import StallScheduleUpdated
 from app.modules.stalls.models import StallLocation, StallSession
 from app.modules.stalls.schemas import (
     LocationCreate,
@@ -24,13 +26,30 @@ ALLOWED_TRANSITIONS = {
     "scheduled": {"open", "cancelled"},
     "open": {"closed"},
 }
+STATUS_TO_CHANGE = {"open": "opened", "closed": "closed", "cancelled": "cancelled"}
 
 SLOT_TAKEN = "A session already exists for this location, date and start time"
 ANOTHER_OPEN = "Another session is already open. Close it first."
+HAS_ORDERS = "This session has orders and cannot be deleted. Cancel it instead."
 
 
 def today_ist() -> date:
     return datetime.now(IST).date()
+
+
+def _schedule_event(
+    session: StallSession, location: StallLocation, change: str
+) -> StallScheduleUpdated:
+    return StallScheduleUpdated(
+        session_id=session.id,
+        change=change,
+        location_id=location.id,
+        location_name=location.name,
+        session_date=session.session_date,
+        start_time=session.start_time,
+        end_time=session.end_time,
+        status=session.status,
+    )
 
 
 # ---------------- Locations ----------------
@@ -127,7 +146,7 @@ def _ensure_slot_free(
 
 
 def create_session(db: Session, data: SessionCreate) -> StallSession:
-    get_location(db, data.location_id)  # must exist and be active
+    location = get_location(db, data.location_id)  # must exist and be active
     if data.session_date < today_ist():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Session date is in the past")
     _ensure_slot_free(db, data.location_id, data.session_date, data.start_time)
@@ -135,10 +154,15 @@ def create_session(db: Session, data: SessionCreate) -> StallSession:
     session = StallSession(**data.model_dump())
     db.add(session)
     try:
+        db.flush()
+        bus.publish(db, _schedule_event(session, location, "created"))
         db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, SLOT_TAKEN)
+    except Exception:
+        db.rollback()
+        raise
     return get_session(db, session.id)
 
 
@@ -152,8 +176,9 @@ def update_session(db: Session, session_id: uuid.UUID, data: SessionUpdate) -> S
         if field in changes and changes[field] is None:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, f"{field} cannot be empty")
 
+    location = session.location
     if "location_id" in changes:
-        get_location(db, changes["location_id"])
+        location = get_location(db, changes["location_id"])
 
     new_location = changes.get("location_id", session.location_id)
     new_date = changes.get("session_date", session.session_date)
@@ -166,13 +191,22 @@ def update_session(db: Session, session_id: uuid.UUID, data: SessionUpdate) -> S
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Session date is in the past")
     _ensure_slot_free(db, new_location, new_date, new_start, ignore_id=session.id)
 
-    for field, value in changes.items():
+    changed = {f: v for f, v in changes.items() if getattr(session, f) != v}
+    if not changed:
+        return session  # nothing really changed, so nothing is announced
+
+    for field, value in changed.items():
         setattr(session, field, value)
     try:
+        db.flush()
+        bus.publish(db, _schedule_event(session, location, "updated"))
         db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, SLOT_TAKEN)
+    except Exception:
+        db.rollback()
+        raise
     return get_session(db, session_id)
 
 
@@ -183,8 +217,18 @@ def delete_session(db: Session, session_id: uuid.UUID) -> None:
             status.HTTP_409_CONFLICT,
             "Open or closed sessions are kept as history and cannot be deleted",
         )
-    db.delete(session)
-    db.commit()
+    event = _schedule_event(session, session.location, "deleted")
+    try:
+        db.delete(session)
+        db.flush()  # a session that has orders is refused by the foreign key here
+        bus.publish(db, event)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, HAS_ORDERS)
+    except Exception:
+        db.rollback()
+        raise
 
 
 def change_status(db: Session, session_id: uuid.UUID, new_status: str) -> StallSession:
@@ -202,12 +246,20 @@ def change_status(db: Session, session_id: uuid.UUID, new_status: str) -> StallS
         )
         if other_open:
             raise HTTPException(status.HTTP_409_CONFLICT, ANOTHER_OPEN)
+
     session.status = new_status
     try:
+        db.flush()  # PostgreSQL's one-open-session index is checked here
+        bus.publish(
+            db, _schedule_event(session, session.location, STATUS_TO_CHANGE[new_status])
+        )
         db.commit()
-    except IntegrityError:  # two requests raced; PostgreSQL's one-open index caught it
+    except IntegrityError:
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, ANOTHER_OPEN)
+    except Exception:
+        db.rollback()
+        raise
     return get_session(db, session_id)
 
 

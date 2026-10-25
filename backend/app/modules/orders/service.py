@@ -1,11 +1,12 @@
-﻿import uuid
+import uuid
 from decimal import Decimal
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.modules.inventory.service import release_stock, reserve_stock
+from app.core.events import bus
+from app.modules.orders.events import OrderCancelled, OrderCreated, OrderLine
 from app.modules.orders.models import Order, OrderItem
 from app.modules.orders.schemas import OrderCreate
 from app.modules.products.models import Product
@@ -102,6 +103,7 @@ def create_order(db: Session, user: User, data: OrderCreate) -> Order:
         total_amount=Decimal("0.00"),
     )
     total = Decimal("0.00")
+    lines: list[OrderLine] = []
     for product_id, quantity in wanted.items():
         product = products[product_id]
         order.items.append(
@@ -112,16 +114,37 @@ def create_order(db: Session, user: User, data: OrderCreate) -> Order:
                 unit_price=product.price,
             )
         )
+        lines.append(
+            OrderLine(
+                product_id=product.id,
+                product_name=product.name,
+                quantity=quantity,
+                unit_price=product.price,
+            )
+        )
         total += product.price * quantity
     order.total_amount = total.quantize(Decimal("0.01"))
 
-    # 5. One transaction: save the order AND take the stock, or neither.
-    session_id = session.id
+    # 5. One transaction: save the order, announce it, let the handlers react.
+    #    The inventory handler is critical: a shortage raises 409 and everything rolls back.
     try:
         db.add(order)
         db.flush()
         order_id = order.id
-        reserve_stock(db, session_id, list(wanted.items()))
+        bus.publish(
+            db,
+            OrderCreated(
+                order_id=order_id,
+                customer_id=user.id,
+                customer_name=user.name,
+                session_id=session.id,
+                location_id=session.location_id,
+                location_name=session.location.name,
+                session_date=session.session_date,
+                total_amount=order.total_amount,
+                items=tuple(lines),
+            ),
+        )
         db.commit()
     except Exception:
         db.rollback()
@@ -155,7 +178,7 @@ def cancel_my_order(db: Session, user: User, order_id: uuid.UUID) -> Order:
             status.HTTP_409_CONFLICT,
             "Only pending orders can be cancelled here. Please contact the stall.",
         )
-    return _apply_status(db, order, "cancelled")
+    return _apply_status(db, order, "cancelled", actor="customer")
 
 
 # ---------------- admin views ----------------
@@ -181,11 +204,11 @@ def get_order(db: Session, order_id: uuid.UUID) -> Order:
 
 def change_status(db: Session, order_id: uuid.UUID, new_status: str) -> Order:
     order = _load_order(db, order_id, lock=True)
-    return _apply_status(db, order, new_status)
+    return _apply_status(db, order, new_status, actor="admin")
 
 
 # ---------------- status changes ----------------
-def _apply_status(db: Session, order: Order, new_status: str) -> Order:
+def _apply_status(db: Session, order: Order, new_status: str, actor: str = "admin") -> Order:
     if new_status not in ALLOWED_TRANSITIONS.get(order.status, set()):
         raise HTTPException(
             status.HTTP_409_CONFLICT,
@@ -194,11 +217,25 @@ def _apply_status(db: Session, order: Order, new_status: str) -> Order:
     order_id = order.id
     try:
         if new_status == "cancelled":
-            # Stock goes back in the same transaction as the status change.
-            release_stock(
+            # The inventory handler returns the stock inside this same transaction.
+            bus.publish(
                 db,
-                order.session_id,
-                [(item.product_id, item.quantity) for item in order.items],
+                OrderCancelled(
+                    order_id=order.id,
+                    customer_id=order.customer_id,
+                    session_id=order.session_id,
+                    cancelled_by=actor,
+                    total_amount=order.total_amount,
+                    items=tuple(
+                        OrderLine(
+                            product_id=item.product_id,
+                            product_name=item.product_name,
+                            quantity=item.quantity,
+                            unit_price=item.unit_price,
+                        )
+                        for item in order.items
+                    ),
+                ),
             )
         order.status = new_status
         db.commit()
