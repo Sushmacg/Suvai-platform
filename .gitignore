@@ -1,47 +1,41 @@
 # Python
-
-**pycache**/
+__pycache__/
 *.py[cod]
 *.pyo
 
 # Virtual environment
 venv/
-.env
-__pycache__/
-*.pyc
-# Environment variables / secrets
 
+# Environment variables / secrets
 .env
 
 # Database
-
 *.db
 *.sqlite
 *.sqlite3
 
 # IDE
-
 .vscode/
 .idea/
 
 # OS
-
 .DS_Store
 Thumbs.db
 
 # Logs
-
 *.log
 
 # Python tools
-
 .pytest_cache/
 .mypy_cache/
 .coverage
 htmlcov/
 
 # Build
-
 build/
 dist/
 *.egg-info/
+
+# Trained ML models are generated, never committed
+backend/app/ml/artifacts/*
+!backend/app/ml/artifacts/.gitkeep
