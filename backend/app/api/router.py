@@ -38,3 +38,5 @@ def health_check():
 
 # Later, module routers get included here, for example:
 # api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
+from app.modules.analytics.router import router as analytics_router
+api_router.include_router(analytics_router)
