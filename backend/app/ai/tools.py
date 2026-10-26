@@ -76,3 +76,79 @@ def get_demand_forecast(db: Session, date_str: str | None = None) -> dict:
         ],
         "note": NOTE,
     }
+
+from app.modules.analytics import service as analytics  # noqa: E402
+
+BAD_DAYS = {"error": "days must be a whole number from 1 to 365"}
+BAD_LIMIT = {"error": "limit must be a whole number from 1 to 10"}
+
+
+def _whole(value, default, low, high):
+    if value is None:
+        return default
+    if isinstance(value, bool) or not isinstance(value, int) or not low <= value <= high:
+        raise ValueError
+    return value
+
+
+def get_business_summary(db: Session, args: dict) -> dict:
+    try:
+        days = _whole(args.get("days"), 30, 1, 365)
+    except ValueError:
+        return BAD_DAYS
+    return {"days": days, "summary": analytics.summary(db, days)}
+
+
+def get_top_products(db: Session, args: dict) -> dict:
+    try:
+        days = _whole(args.get("days"), 30, 1, 365)
+    except ValueError:
+        return BAD_DAYS
+    try:
+        limit = _whole(args.get("limit"), 5, 1, 10)
+    except ValueError:
+        return BAD_LIMIT
+    return {"days": days, "products": analytics.products(db, days, limit)}
+
+
+def _days_schema(extra=None):
+    props = {"days": {"type": ["integer", "null"], "description": "1 to 365. Default 30."}}
+    props.update(extra or {})
+    return {"type": "object", "properties": props, "required": []}
+
+
+TOOL_SCHEMAS.extend(
+    [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_business_summary",
+                "description": "Revenue, orders and profit summary for the last N days. Read-only.",
+                "parameters": _days_schema(),
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_top_products",
+                "description": "Best-selling products for the last N days. Read-only.",
+                "parameters": _days_schema(
+                    {"limit": {"type": ["integer", "null"], "description": "1 to 10. Default 5."}}
+                ),
+            },
+        },
+    ]
+)
+
+HANDLERS = {
+    "get_demand_forecast": lambda db, a: get_demand_forecast(db, a.get("date")),
+    "get_business_summary": get_business_summary,
+    "get_top_products": get_top_products,
+}
+
+
+def run_tool(db, name, args) -> dict:
+    handler = HANDLERS.get(name)
+    if handler is None or db is None:
+        return {"error": "unknown tool"}
+    return handler(db, args if isinstance(args, dict) else {})

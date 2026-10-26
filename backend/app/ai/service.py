@@ -9,11 +9,11 @@ MAX_ANSWER_CHARS = 2000
 MAX_TOOL_ROUNDS = 3
 SYSTEM_PROMPT = (
     "You are the business assistant for Suvai, a small food stall business. "
-    "You have one read-only tool, get_demand_forecast. "
+    "You have read-only tools for the demand forecast and business analytics. "
     "Only state numbers that come from a tool result. Never invent numbers. "
     "If a tool returns an error or you have no tool for the question, say the data is unavailable. "
     "Forecasts are units expected to sell and may understate demand for products that sell out. "
-    "Keep answers short and practical."
+    "All money amounts are in Indian rupees (use the ₹ symbol, never $). " "Only state dates that appear in a tool result. Round money to the nearest rupee. " "Keep answers short and practical."
 )
 
 
@@ -28,11 +28,7 @@ def _bind(llm):
 
 
 def _run_tool(db, call: dict) -> dict:
-    if call.get("name") != "get_demand_forecast" or db is None:
-        return {"error": "unknown tool"}
-    args = call.get("args")
-    date_str = args.get("date") if isinstance(args, dict) else None
-    return tools.get_demand_forecast(db, date_str)
+    return tools.run_tool(db, call.get("name"), call.get("args"))
 
 
 def ask(llm, question: str, db=None) -> str:
