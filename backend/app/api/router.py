@@ -13,6 +13,7 @@ from app.modules.event_log.router import router as event_log_router
 from app.modules.notifications.router import router as notifications_router
 
 from app.modules.forecasts.router import router as forecasts_router
+from app.ai.router import router as assistant_router
 
 api_router = APIRouter(prefix=settings.API_V1_PREFIX)
 api_router.include_router(auth_router)
@@ -43,3 +44,4 @@ def health_check():
 from app.modules.analytics.router import router as analytics_router
 api_router.include_router(analytics_router)
 api_router.include_router(forecasts_router)
+api_router.include_router(assistant_router)
