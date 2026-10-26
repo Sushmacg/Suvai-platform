@@ -1,19 +1,55 @@
-from langchain_core.messages import HumanMessage, SystemMessage
+import json
 
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+
+from app.ai import tools
 from app.ai.llm import AssistantUnavailable, map_provider_error
 
 MAX_ANSWER_CHARS = 2000
+MAX_TOOL_ROUNDS = 3
 SYSTEM_PROMPT = (
     "You are the business assistant for Suvai, a small food stall business. "
-    "You currently have NO access to sales, stock, expense or forecast data. "
-    "Never invent numbers. If a question needs data, say the data is not available to you yet. "
+    "You have one read-only tool, get_demand_forecast. "
+    "Only state numbers that come from a tool result. Never invent numbers. "
+    "If a tool returns an error or you have no tool for the question, say the data is unavailable. "
+    "Forecasts are units expected to sell and may understate demand for products that sell out. "
     "Keep answers short and practical."
 )
 
 
-def ask(llm, question: str) -> str:
+def _bind(llm):
+    binder = getattr(llm, "bind_tools", None)
+    if binder is None:
+        return llm
     try:
-        reply = llm.invoke([SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=question)])
+        return binder(tools.TOOL_SCHEMAS)
+    except NotImplementedError:
+        return llm
+
+
+def _run_tool(db, call: dict) -> dict:
+    if call.get("name") != "get_demand_forecast" or db is None:
+        return {"error": "unknown tool"}
+    args = call.get("args")
+    date_str = args.get("date") if isinstance(args, dict) else None
+    return tools.get_demand_forecast(db, date_str)
+
+
+def ask(llm, question: str, db=None) -> str:
+    bound = _bind(llm)
+    messages = [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=question)]
+    try:
+        for _ in range(MAX_TOOL_ROUNDS + 1):
+            reply = bound.invoke(messages)
+            calls = getattr(reply, "tool_calls", None) or []
+            if not calls:
+                break
+            messages.append(reply)
+            for call in calls:
+                result = json.dumps(_run_tool(db, call), default=str)
+                messages.append(ToolMessage(content=result, tool_call_id=call.get("id") or "0"))
+        else:
+            raise AssistantUnavailable(502, "The assistant could not finish the request.")
     except AssistantUnavailable:
         raise
     except Exception as exc:
