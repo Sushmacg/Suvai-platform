@@ -33,7 +33,7 @@ def build_llm(settings: AiSettings, model: str | None = None):
 def map_provider_error(exc: Exception) -> AssistantUnavailable:
     """Turn a provider failure into a safe message. Never echoes provider text."""
     name = type(exc).__name__
-    log.warning("Assistant provider error: %s status=%s detail=%s", name, getattr(exc, "status_code", None), str(getattr(exc, "body", None) or "")[:300])
+    log.warning("Assistant provider error: %s status=%s", name, getattr(exc, "status_code", None))
     if name == "RateLimitError":
         return AssistantUnavailable(429, "The AI provider rate limit was reached. Try again shortly.")
     if "Timeout" in name:

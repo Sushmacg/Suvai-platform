@@ -37,3 +37,12 @@ def test_provider_errors_are_mapped_safely(name, code):
     out = llm.map_provider_error(exc)
     assert out.status_code == code
     assert "gsk_" not in out.message and "secret" not in out.message
+
+def test_provider_log_never_contains_error_body(caplog):
+    exc = type("BadRequestError", (Exception,), {})("detail")
+    exc.status_code = 400
+    exc.body = {"error": "gsk_secret_value customer 9000000001"}
+    with caplog.at_level("WARNING"):
+        llm.map_provider_error(exc)
+    assert "gsk_" not in caplog.text and "9000000001" not in caplog.text
+    assert "400" in caplog.text
