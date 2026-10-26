@@ -55,4 +55,4 @@ def test_invalid_arguments_are_rejected(name, args, monkeypatch):
 
 def test_only_approved_tools_exist():
     names = {s["function"]["name"] for s in tools.TOOL_SCHEMAS}
-    assert names == set(tools.HANDLERS) == {"get_demand_forecast", "get_business_summary", "get_top_products"}
+    assert names == set(tools.HANDLERS) == {"get_demand_forecast", "get_business_summary", "get_top_products", "get_expense_summary"}

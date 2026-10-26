@@ -152,3 +152,85 @@ def run_tool(db, name, args) -> dict:
     if handler is None or db is None:
         return {"error": "unknown tool"}
     return handler(db, args if isinstance(args, dict) else {})
+
+from fastapi import HTTPException  # noqa: E402
+from app.modules.expenses import service as expenses  # noqa: E402
+
+
+def get_expense_summary(db: Session, args: dict) -> dict:
+    try:
+        days = _whole(args.get("days"), 30, 1, 365)
+    except ValueError:
+        return BAD_DAYS
+    category = args.get("category")
+    if category is not None and (not isinstance(category, str) or not 0 < len(category) <= 50):
+        return {"error": "category must be a short text"}
+    end = today_ist()
+    start = end - timedelta(days=days - 1)
+    try:
+        result = expenses.summarize(db, category, start, end, None)
+    except HTTPException as exc:
+        return {"error": str(exc.detail)}
+    if hasattr(result, "model_dump"):
+        data = result.model_dump(mode="json")
+    elif isinstance(result, dict):
+        data = result
+    else:
+        return {"error": "expense data is not available"}
+    return {"from": start.isoformat(), "to": end.isoformat(), "expenses": data}
+
+
+TOOL_SCHEMAS.append(
+    {
+        "type": "function",
+        "function": {
+            "name": "get_expense_summary",
+            "description": "Expense totals for the last N days, optionally for one category. Read-only.",
+            "parameters": _days_schema(
+                {"category": {"type": ["string", "null"], "description": "Optional category, e.g. fuel."}}
+            ),
+        },
+    }
+)
+HANDLERS["get_expense_summary"] = get_expense_summary
+
+from fastapi import HTTPException  # noqa: E402
+from app.modules.expenses import service as expenses  # noqa: E402
+
+
+def get_expense_summary(db: Session, args: dict) -> dict:
+    try:
+        days = _whole(args.get("days"), 30, 1, 365)
+    except ValueError:
+        return BAD_DAYS
+    category = args.get("category")
+    if category is not None and (not isinstance(category, str) or not 0 < len(category) <= 50):
+        return {"error": "category must be a short text"}
+    end = today_ist()
+    start = end - timedelta(days=days - 1)
+    try:
+        result = expenses.summarize(db, category, start, end, None)
+    except HTTPException as exc:
+        return {"error": str(exc.detail)}
+    if hasattr(result, "model_dump"):
+        data = result.model_dump(mode="json")
+    elif isinstance(result, dict):
+        data = result
+    else:
+        return {"error": "expense data is not available"}
+    return {"from": start.isoformat(), "to": end.isoformat(), "expenses": data}
+
+
+TOOL_SCHEMAS.append(
+    {
+        "type": "function",
+        "function": {
+            "name": "get_expense_summary",
+            "description": "Expense totals for the last N days, optionally for one category. Read-only.",
+            "parameters": _days_schema(
+                {"category": {"type": ["string", "null"], "description": "Optional category, e.g. fuel."}}
+            ),
+        },
+    }
+)
+HANDLERS["get_expense_summary"] = get_expense_summary
