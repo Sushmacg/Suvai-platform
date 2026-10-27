@@ -33,9 +33,9 @@ api_router.include_router(notifications_router)
 def health_check():
     return {
         "status": "ok",
-        "app": settings.PROJECT_NAME,
-        "version": settings.VERSION,
-        "environment": settings.ENVIRONMENT,
+        "app": settings.app_name,
+        "version": settings.version,
+        "environment": settings.environment,
     }
 
 
