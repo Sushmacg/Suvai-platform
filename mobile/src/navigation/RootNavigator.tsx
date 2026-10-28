@@ -8,6 +8,8 @@ import { RegisterScreen } from "../screens/auth/RegisterScreen";
 import { PlaceholderScreen } from "../screens/common/PlaceholderScreen";
 import { ProfileScreen } from "../screens/common/ProfileScreen";
 import { MenuStack } from "./MenuStack";
+import { ForecastScreen } from "../screens/admin/ForecastScreen";
+import { AssistantScreen } from "../screens/admin/AssistantScreen";
 import { AdminStockScreen } from "../screens/admin/AdminStockScreen";
 import { DashboardScreen } from "../screens/admin/DashboardScreen";
 import { AdminOrdersScreen } from "../screens/admin/AdminOrdersScreen";
@@ -25,7 +27,7 @@ const tabOptions = {
   tabBarInactiveTintColor: colors.muted,
   tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
   tabBarIconStyle: { display: "none" as const },
-  tabBarLabelStyle: { fontSize: 14, fontWeight: "600" as const, paddingBottom: 10 },
+  tabBarLabelStyle: { fontSize: 12, fontWeight: "600" as const, paddingBottom: 10 },
 };
 
 
@@ -50,6 +52,8 @@ function AdminTabs() {
       <Tabs.Screen name="Dashboard" component={DashboardScreen} />
       <Tabs.Screen name="Orders" component={AdminOrdersScreen} />
       <Tabs.Screen name="Stock" component={AdminStockScreen} />
+      <Tabs.Screen name="Forecast" component={ForecastScreen} />
+      <Tabs.Screen name="Assistant" component={AssistantScreen} />
       <Tabs.Screen name="Profile" component={ProfileScreen} />
     </Tabs.Navigator>
   );

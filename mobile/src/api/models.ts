@@ -121,3 +121,16 @@ export interface LocationSales {
   revenue: number;
   orders: number;
 }
+
+export interface ForecastItem {
+  date: string;
+  location_id: string;
+  product_id: string;
+  predicted_units: number;
+}
+
+export interface ForecastResponse {
+  model_version: string;
+  forecast_date: string;
+  items: ForecastItem[];
+}
