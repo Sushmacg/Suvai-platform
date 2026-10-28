@@ -39,3 +39,5 @@ dist/
 # Trained ML models are generated, never committed
 backend/app/ml/artifacts/*
 !backend/app/ml/artifacts/.gitkeep
+.venv/
+.venv-1/
