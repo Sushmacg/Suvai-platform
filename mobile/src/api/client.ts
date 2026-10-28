@@ -41,7 +41,7 @@ async function parseError(res: Response): Promise<string> {
     const detail = (await res.json())?.detail;
     if (typeof detail === "string") return detail;
     if (Array.isArray(detail) && detail.length) {
-      return detail.map((e) => e?.msg ?? "Invalid input").join("; ");
+      return detail.map((e) => { const field = Array.isArray(e?.loc) ? String(e.loc[e.loc.length - 1]) : ""; return (field ? field + ": " : "") + (e?.msg ?? "Invalid input"); }).join("; ");
     }
   } catch {
     // body was not JSON

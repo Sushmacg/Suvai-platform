@@ -7,6 +7,7 @@ import { LoginScreen } from "../screens/auth/LoginScreen";
 import { RegisterScreen } from "../screens/auth/RegisterScreen";
 import { PlaceholderScreen } from "../screens/common/PlaceholderScreen";
 import { ProfileScreen } from "../screens/common/ProfileScreen";
+import { MenuStack } from "./MenuStack";
 import { colors, spacing, typography } from "../theme";
 import type { AuthStackParamList } from "./types";
 
@@ -22,7 +23,7 @@ const tabOptions = {
   tabBarLabelStyle: { fontSize: 14, fontWeight: "600" as const, paddingBottom: 10 },
 };
 
-const Menu = () => <PlaceholderScreen title="Menu" />;
+
 const MyOrders = () => <PlaceholderScreen title="My orders" />;
 const Dashboard = () => <PlaceholderScreen title="Dashboard" />;
 const AdminOrders = () => <PlaceholderScreen title="Orders" />;
@@ -30,7 +31,7 @@ const AdminOrders = () => <PlaceholderScreen title="Orders" />;
 function CustomerTabs() {
   return (
     <Tabs.Navigator screenOptions={tabOptions}>
-      <Tabs.Screen name="Menu" component={Menu} />
+      <Tabs.Screen name="Menu" component={MenuStack} />
       <Tabs.Screen name="Orders" component={MyOrders} />
       <Tabs.Screen name="Profile" component={ProfileScreen} />
     </Tabs.Navigator>
