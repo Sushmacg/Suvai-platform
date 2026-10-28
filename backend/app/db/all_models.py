@@ -1,4 +1,4 @@
-﻿# Import every model here so Alembic can detect it.
+# Import every model here so Alembic can detect it.
 from app.modules.users.models import User  # noqa: F401
 from app.modules.auth.models import RefreshToken  # noqa: F401
 from app.modules.products.models import Product  # noqa: F401
@@ -8,4 +8,4 @@ from app.modules.orders.models import Order, OrderItem  # noqa: F401
 from app.modules.expenses.models import Expense  # noqa: F401
 from app.modules.reviews.models import Review  # noqa: F401
 from app.modules.event_log.models import EventLog  # noqa: F401
-from app.modules.notifications.models import Notification  # noqa: F401
+from app.modules.notifications.models import DeviceToken, Notification  # noqa: F401

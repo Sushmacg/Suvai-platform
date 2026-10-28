@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     ADMIN_PHONE: str = ""
     ADMIN_PASSWORD: str = ""
 
+    # Firebase Cloud Messaging. The service-account JSON stays outside git.
+    FCM_ENABLED: bool = False
+    FCM_CREDENTIALS_FILE: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

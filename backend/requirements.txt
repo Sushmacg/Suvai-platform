@@ -67,3 +67,5 @@ requests-toolbelt==1.0.0
 tenacity==9.2.1
 xxhash==4.0.2
 zstandard==0.25.0
+
+google-auth==2.62.0
