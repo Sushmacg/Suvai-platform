@@ -8,6 +8,8 @@ import { RegisterScreen } from "../screens/auth/RegisterScreen";
 import { PlaceholderScreen } from "../screens/common/PlaceholderScreen";
 import { ProfileScreen } from "../screens/common/ProfileScreen";
 import { MenuStack } from "./MenuStack";
+import { DashboardScreen } from "../screens/admin/DashboardScreen";
+import { AdminOrdersScreen } from "../screens/admin/AdminOrdersScreen";
 import { OrderScreen } from "../screens/customer/OrderScreen";
 import { MyOrdersScreen } from "../screens/customer/MyOrdersScreen";
 import { colors, spacing, typography } from "../theme";
@@ -27,8 +29,8 @@ const tabOptions = {
 
 
 
-const Dashboard = () => <PlaceholderScreen title="Dashboard" />;
-const AdminOrders = () => <PlaceholderScreen title="Orders" />;
+
+
 
 function CustomerTabs() {
   return (
@@ -44,8 +46,8 @@ function CustomerTabs() {
 function AdminTabs() {
   return (
     <Tabs.Navigator screenOptions={tabOptions}>
-      <Tabs.Screen name="Dashboard" component={Dashboard} />
-      <Tabs.Screen name="Orders" component={AdminOrders} />
+      <Tabs.Screen name="Dashboard" component={DashboardScreen} />
+      <Tabs.Screen name="Orders" component={AdminOrdersScreen} />
       <Tabs.Screen name="Profile" component={ProfileScreen} />
     </Tabs.Navigator>
   );

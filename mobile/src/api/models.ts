@@ -71,3 +71,22 @@ export interface Order {
   items: OrderItem[];
   session: StallSession;
 }
+
+export interface AdminOrder extends Order {
+  customer_id: string;
+  customer_name: string;
+  customer_phone: string;
+}
+
+export interface AnalyticsSummary {
+  from: string;
+  to: string;
+  revenue: number;
+  orders: number;
+  expenses: number;
+  profit: number;
+  stocked: number;
+  sold: number;
+  wasted: number;
+  sell_through: number;
+}
