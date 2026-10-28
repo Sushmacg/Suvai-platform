@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { api } from "../../api/client";
+import { ReviewForm } from "../../components/ReviewForm";
 import type { Product, PublicReview, RatingSummary } from "../../api/models";
 import { ProductImage } from "../../components/ProductImage";
 import { Screen } from "../../components/Screen";
@@ -41,6 +42,7 @@ export function ProductDetailScreen({ route }: Props) {
       )}
       {product.description ? <Text style={typography.body}>{product.description}</Text> : null}
       {!product.is_available ? <Text style={styles.unavailable}>Currently unavailable</Text> : null}
+      <ReviewForm productId={productId} />
       {reviews.length > 0 ? <Text style={typography.heading}>Reviews</Text> : null}
       {reviews.map((r) => (
         <View key={r.id} style={styles.review}>

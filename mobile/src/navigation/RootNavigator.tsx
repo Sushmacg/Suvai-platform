@@ -8,12 +8,14 @@ import { RegisterScreen } from "../screens/auth/RegisterScreen";
 import { PlaceholderScreen } from "../screens/common/PlaceholderScreen";
 import { ProfileScreen } from "../screens/common/ProfileScreen";
 import { MenuStack } from "./MenuStack";
+import { ManageStack } from "./ManageStack";
 import { ForecastScreen } from "../screens/admin/ForecastScreen";
 import { AssistantScreen } from "../screens/admin/AssistantScreen";
-import { AdminStockScreen } from "../screens/admin/AdminStockScreen";
+
 import { DashboardScreen } from "../screens/admin/DashboardScreen";
 import { AdminOrdersScreen } from "../screens/admin/AdminOrdersScreen";
 import { OrderScreen } from "../screens/customer/OrderScreen";
+import { StallScreen } from "../screens/customer/StallScreen";
 import { MyOrdersScreen } from "../screens/customer/MyOrdersScreen";
 import { colors, spacing, typography } from "../theme";
 import type { AuthStackParamList } from "./types";
@@ -39,6 +41,7 @@ function CustomerTabs() {
   return (
     <Tabs.Navigator screenOptions={tabOptions}>
       <Tabs.Screen name="Menu" component={MenuStack} />
+      <Tabs.Screen name="Stall" component={StallScreen} />
       <Tabs.Screen name="Order" component={OrderScreen} />
       <Tabs.Screen name="Orders" component={MyOrdersScreen} />
       <Tabs.Screen name="Profile" component={ProfileScreen} />
@@ -51,7 +54,7 @@ function AdminTabs() {
     <Tabs.Navigator screenOptions={tabOptions}>
       <Tabs.Screen name="Dashboard" component={DashboardScreen} />
       <Tabs.Screen name="Orders" component={AdminOrdersScreen} />
-      <Tabs.Screen name="Stock" component={AdminStockScreen} />
+      <Tabs.Screen name="Manage" component={ManageStack} />
       <Tabs.Screen name="Forecast" component={ForecastScreen} />
       <Tabs.Screen name="Assistant" component={AssistantScreen} />
       <Tabs.Screen name="Profile" component={ProfileScreen} />
