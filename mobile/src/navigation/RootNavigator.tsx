@@ -8,6 +8,7 @@ import { RegisterScreen } from "../screens/auth/RegisterScreen";
 import { PlaceholderScreen } from "../screens/common/PlaceholderScreen";
 import { ProfileScreen } from "../screens/common/ProfileScreen";
 import { MenuStack } from "./MenuStack";
+import { AdminStockScreen } from "../screens/admin/AdminStockScreen";
 import { DashboardScreen } from "../screens/admin/DashboardScreen";
 import { AdminOrdersScreen } from "../screens/admin/AdminOrdersScreen";
 import { OrderScreen } from "../screens/customer/OrderScreen";
@@ -48,6 +49,7 @@ function AdminTabs() {
     <Tabs.Navigator screenOptions={tabOptions}>
       <Tabs.Screen name="Dashboard" component={DashboardScreen} />
       <Tabs.Screen name="Orders" component={AdminOrdersScreen} />
+      <Tabs.Screen name="Stock" component={AdminStockScreen} />
       <Tabs.Screen name="Profile" component={ProfileScreen} />
     </Tabs.Navigator>
   );

@@ -90,3 +90,34 @@ export interface AnalyticsSummary {
   wasted: number;
   sell_through: number;
 }
+
+export interface StockAdmin {
+  id: string;
+  session_id: string;
+  product_id: string;
+  product_name: string;
+  stocked_qty: number;
+  sold_qty: number;
+  wasted_qty: number;
+  available_qty: number;
+  min_stock: number;
+  is_low_stock: boolean;
+}
+
+export interface SalesDay {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface TopProduct {
+  name: string;
+  units: number;
+  revenue: number;
+}
+
+export interface LocationSales {
+  name: string;
+  revenue: number;
+  orders: number;
+}

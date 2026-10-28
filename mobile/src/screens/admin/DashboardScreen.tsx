@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { api } from "../../api/client";
 import type { AnalyticsSummary } from "../../api/models";
 import { Screen } from "../../components/Screen";
+import { Breakdown } from "./Breakdown";
 import { ErrorView, LoadingView } from "../../components/States";
 import { useLoad } from "../../hooks/useLoad";
 import { rupees } from "../../utils/format";
@@ -61,6 +62,7 @@ export function DashboardScreen() {
           </View>
         </>
       )}
+    {data && !loading && !error ? <Breakdown days={days} /> : null}
     </Screen>
   );
 }
