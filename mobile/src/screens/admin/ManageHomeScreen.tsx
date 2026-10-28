@@ -9,6 +9,7 @@ const ITEMS = [
   { to: "Sessions", title: "Stall sessions", hint: "Schedule visits, open and close the stall" },
   { to: "Stock", title: "Stock", hint: "Set how many packs each product has per session" },
   { to: "Expenses", title: "Expenses", hint: "Record costs and see the 30-day total" },
+  { to: "Locations", title: "Locations", hint: "Add stall places and choose which customers see" },
 ] as const;
 
 export function ManageHomeScreen({ navigation }: Props) {
