@@ -1,0 +1,10 @@
+export type Product = { id: string; name: string; description: string | null; category: string; price: string; image_url: string | null; is_available: boolean; is_active: boolean };
+export type PublicReview = { id: string; reviewer_name: string; rating: number; comment: string | null; created_at: string };
+export type RatingSummary = { product_id: string; average: number | null; count: number; stars: Record<string, number> };
+export type Location = { id: string; name: string; address: string | null; latitude: number; longitude: number; google_place_id?: string | null; is_active: boolean };
+export type StallSession = { id: string; session_date: string; start_time: string; end_time: string; status: string; notes: string | null; location: Location; distance_km?: number };
+export type CurrentStall = { state: "open" | "upcoming" | "none"; session: StallSession | null };
+export type StockItem = { product_id: string; product_name: string; price: string; available_qty: number; in_stock: boolean };
+export type OrderItem = { product_id: string; product_name: string; quantity: number; unit_price: string; line_total: string };
+export type Order = { id: string; status: string; total_amount: string; notes: string | null; created_at: string; items: OrderItem[]; session: StallSession };
+export type AppNotification = { id: string; event_type: string; title: string; body: string; created_at: string };

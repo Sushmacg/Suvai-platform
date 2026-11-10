@@ -63,3 +63,38 @@ The sales data used for training is generated, not real. It proves the pipeline 
 - No payments in this version.
 - Maps: stalls open in Google Maps through a link built from coordinates. No API key is needed.
 - Secrets live only in `backend/.env`, which is git-ignored.
+## Website
+
+A responsive React website for customers and the admin, in `web/`. It talks to the same FastAPI backend as the mobile app and adds no backend logic of its own.
+
+**Stack:** React 18, TypeScript, Vite, React Router, Tailwind CSS v4.
+
+**Run (two terminals):**
+
+```powershell
+# backend
+cd backend
+..\.venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload
+
+# website
+cd web
+npm install
+npm run dev        # http://localhost:5173
+```
+
+**Configuration:** `web/.env` holds `VITE_API_URL=http://localhost:8000` (no `/api/v1`; the client adds it). `web/.env.example` shows the format. No secrets live in the website. The backend must allow the website origin: `CORS_ORIGINS` in `backend/.env` must contain `http://localhost:5173` (a JSON list), and `app/main.py` reads it.
+
+**Customer pages:** home, register, login, menu, product detail with ratings and reviews, stalls (current, today, upcoming, nearest by browser location, Google Maps links), cart and ordering for a chosen session, order history and detail with live status and cancel, notifications.
+
+**Admin pages** (role `admin` only, enforced by the backend and by route guards): dashboard analytics, products (add, edit, availability, archive), orders and status updates, inventory per session (set stock, log waste, low-stock filter), stall locations and sessions, expenses, demand forecast, review moderation, AI assistant.
+
+**Commands:** `npm run dev`, `npm run build` (type-checks, then builds to `web/dist`), `npm run typecheck`, `npm test`.
+
+**Known limits:**
+- Product images are set by URL; the backend has no image upload route. Products without an image show a heart-shaped nankhatai illustration.
+- The website has no delete buttons. Products are archived, locations deactivated, sessions cancelled, reviews hidden.
+- The assistant needs a Groq key in `backend/.env`; without it the page shows the backend error.
+- Push notifications are not delivered to browsers. The notifications page lists the messages stored by the backend.
+- No online payment: customers pay at the stall.
+- Short Google Maps links (`maps.app.goo.gl`) cannot be read; paste the full link or the coordinates.
