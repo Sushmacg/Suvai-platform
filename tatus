@@ -1,0 +1,43 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/core/config.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/modules/products/models.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/modules/products/router.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/app/modules/products/schemas.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/package-lock.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/api/client.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/api/models.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/index.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/layouts/AdminLayout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/layouts/PublicLayout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/pages/Home.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/pages/Menu.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/pages/ProductDetail.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/pages/Stalls.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'web/src/pages/admin/AdminProducts.tsx', LF will be replaced by CRLF the next time Git touches it
+.gitignore
+backend/app/core/config.py
+backend/app/db/all_models.py
+backend/app/main.py
+backend/app/modules/products/models.py
+backend/app/modules/products/router.py
+backend/app/modules/products/schemas.py
+mobile/assets/android-icon-background.png
+mobile/assets/android-icon-foreground.png
+mobile/assets/android-icon-monochrome.png
+mobile/assets/icon.png
+web/index.html
+web/package-lock.json
+web/package.json
+web/src/api/client.ts
+web/src/api/models.ts
+web/src/index.css
+web/src/layouts/AdminLayout.tsx
+web/src/layouts/PublicLayout.tsx
+web/src/pages/Home.tsx
+web/src/pages/Menu.tsx
+web/src/pages/ProductDetail.tsx
+web/src/pages/Stalls.tsx
+web/src/pages/admin/AdminProducts.tsx

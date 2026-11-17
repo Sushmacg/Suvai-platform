@@ -56,10 +56,10 @@ export async function request<T>(path: string, opts: Opts = {}): Promise<T> {
     : "";
   const send = () => {
     const headers: Record<string, string> = {};
-    if (body !== undefined) headers["Content-Type"] = "application/json";
+    if (body !== undefined && !(body instanceof FormData)) headers["Content-Type"] = "application/json";
     const t = getTokens();
     if (auth && t) headers.Authorization = `Bearer ${t.access}`;
-    return fetch(`${BASE}${path}${qs}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    return fetch(`${BASE}${path}${qs}`, { method, headers, body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body) });
   };
 
   let res: Response;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { btn } from "../components/ui";
 import { useCart } from "../cart/CartContext";
@@ -11,14 +11,16 @@ export function PublicLayout() {
   const { user, logout } = useAuth();
   const { count } = useCart();
   const nav = useNavigate();
+  const { pathname, hash } = useLocation();
+  const at = (h: string) => link({ isActive: pathname === "/" && hash === h });
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
   const links = (
     <>
-      <NavLink to="/" end className={link} onClick={close}>Home</NavLink>
-      <NavLink to="/menu" className={link} onClick={close}>Menu</NavLink>
-      <NavLink to="/stalls" className={link} onClick={close}>Stalls</NavLink>
+      <NavLink to="/" end className={() => link({ isActive: pathname === "/" && !hash })} onClick={close}>Home</NavLink>
+      <NavLink to="/#menu" className={() => at("#menu")} onClick={close}>Menu</NavLink>
+      <NavLink to="/#stalls" className={() => at("#stalls")} onClick={close}>Stalls</NavLink>
       <NavLink to="/cart" className={link} onClick={close}>Cart{count > 0 ? ` (${count})` : ""}</NavLink>
       {user?.role === "customer" && <NavLink to="/orders" className={link} onClick={close}>My orders</NavLink>}
       {user?.role === "admin" && <NavLink to="/admin" className={link} onClick={close}>Admin</NavLink>}

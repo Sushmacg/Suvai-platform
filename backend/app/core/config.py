@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     FCM_ENABLED: bool = False
     FCM_CREDENTIALS_FILE: str = ""
 
+    # Owner-uploaded product photos are stored here and served at /media.
+    MEDIA_DIR: str = "uploads"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

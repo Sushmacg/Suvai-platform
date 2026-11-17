@@ -9,7 +9,7 @@ import { ProductImage } from "../components/ProductImage";
 import { Stepper } from "../components/Stepper";
 import { Button, Card, Notice, PageSpinner, btn } from "../components/ui";
 import { useLoad } from "../hooks/useLoad";
-import { dateTime, rupees } from "../utils/format";
+import { dateTime, imageUrl, rupees } from "../utils/format";
 
 const Stars = ({ value }: { value: number }) => (
   <span aria-label={`${value} out of 5 stars`} className="text-saffron">{"★".repeat(Math.round(value))}{"☆".repeat(5 - Math.round(value))}</span>
@@ -62,6 +62,7 @@ export function ProductDetail() {
   const reviews = useLoad(() => api.get<PublicReview[]>(`/reviews/product/${id}`, { limit: 20 }, false), [id]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [sel, setSel] = useState<string | null>(null);
 
   if (product.loading && !product.data) return <PageSpinner />;
   if (product.error || !product.data) {
@@ -74,13 +75,29 @@ export function ProductDetail() {
   }
   const p = product.data;
   const s = summary.data;
+  const gallery = p.images ?? [];
+  const shown = sel ?? p.image_url;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <Link to="/menu" className="text-sm font-semibold text-terracotta">&larr; Back to the menu</Link>
       <div className="mt-4 grid gap-8 md:grid-cols-2">
         <div className="overflow-hidden rounded-3xl bg-saffron-soft p-6">
-          <ProductImage product={p} className="float mx-auto aspect-square w-full max-w-sm" />
+          <>
+            <ProductImage key={shown ?? "art"} product={{ ...p, image_url: shown }} className="float mx-auto aspect-square w-full max-w-sm" />
+            {gallery.length > 1 && (
+              <ul className="mt-4 flex flex-wrap justify-center gap-2">
+                {gallery.map((g) => (
+                  <li key={g.id}>
+                    <button type="button" onClick={() => setSel(g.url)} aria-label="Show this photo"
+                      className={`overflow-hidden rounded-lg border-2 ${shown === g.url ? "border-terracotta" : "border-transparent"}`}>
+                      <img src={imageUrl(g.url) ?? ""} alt="" className="h-16 w-16 object-cover" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         </div>
         <div className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted">{p.category}</p>

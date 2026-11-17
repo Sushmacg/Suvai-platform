@@ -1,6 +1,7 @@
 import json
 
 from fastapi import Depends, FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -10,6 +11,7 @@ from app.core.config import settings
 from app.core.deps import get_db
 from app.core.exceptions import register_exception_handlers
 from app.core.event_handlers import register_event_handlers
+from app.modules.products.media import media_root
 
 app = FastAPI(title="Suvai API")
 
@@ -24,6 +26,7 @@ def _origins() -> list[str]:
 app.add_middleware(CORSMiddleware, allow_origins=_origins(), allow_methods=["*"], allow_headers=["*"])
 register_exception_handlers(app)
 register_event_handlers()
+app.mount("/media", StaticFiles(directory=media_root()), name="media")
 app.include_router(api_router)
 
 

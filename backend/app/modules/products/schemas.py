@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 from datetime import datetime
 from decimal import Decimal
 
@@ -32,6 +32,14 @@ class ProductUpdate(BaseModel):
     _normalize = field_validator("category")(_clean_category)
 
 
+class ProductImageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    url: str
+    position: int
+
+
 class ProductResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -45,3 +53,4 @@ class ProductResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    images: list[ProductImageResponse] = []

@@ -8,7 +8,7 @@ import { Button, Card, Notice, PageSpinner, btn } from "../components/ui";
 import { useLoad } from "../hooks/useLoad";
 import { rupees } from "../utils/format";
 
-export function Menu() {
+export function Menu({ embedded = false }: { embedded?: boolean }) {
   const { data, loading, error, reload } = useLoad(() => api.get<Product[]>("/products", undefined, false), []);
   const cart = useCart();
   const [cat, setCat] = useState("All");
@@ -25,7 +25,7 @@ export function Menu() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-4xl font-bold">Our menu</h1>
+      {embedded ? <h2 className="text-4xl font-bold">Our menu</h2> : <h1 className="text-4xl font-bold">Our menu</h1>}
       <p className="mt-1 text-muted">Heart-shaped nankhatai, baked fresh. Order ahead and collect at the stall.</p>
 
       {loading && !data && <PageSpinner />}

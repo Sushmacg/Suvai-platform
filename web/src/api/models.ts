@@ -1,4 +1,4 @@
-export type Product = { id: string; name: string; description: string | null; category: string; price: string; image_url: string | null; is_available: boolean; is_active: boolean };
+export type Product = { id: string; name: string; description: string | null; category: string; price: string; image_url: string | null; is_available: boolean; is_active: boolean; images?: { id: string; url: string; position: number }[] };
 export type PublicReview = { id: string; reviewer_name: string; rating: number; comment: string | null; created_at: string };
 export type RatingSummary = { product_id: string; average: number | null; count: number; stars: Record<string, number> };
 export type Location = { id: string; name: string; address: string | null; latitude: number; longitude: number; google_place_id?: string | null; is_active: boolean };

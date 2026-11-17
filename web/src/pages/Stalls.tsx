@@ -5,7 +5,7 @@ import { SessionCard } from "../components/SessionCard";
 import { Button, Notice, PageSpinner } from "../components/ui";
 import { useLoad } from "../hooks/useLoad";
 
-export function Stalls() {
+export function Stalls({ embedded = false }: { embedded?: boolean }) {
   const cur = useLoad(() => api.get<CurrentStall>("/stalls/current", undefined, false), []);
   const today = useLoad(() => api.get<StallSession[]>("/stalls/today", undefined, false), []);
   const up = useLoad(() => api.get<StallSession[]>("/stalls/upcoming", { days: 14 }, false), []);
@@ -37,7 +37,7 @@ export function Stalls() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-4xl font-bold">Find the stall</h1>
+      {embedded ? <h2 className="text-4xl font-bold">Find the stall</h2> : <h1 className="text-4xl font-bold">Find the stall</h1>}
       <p className="mt-1 text-muted">Where we are, and when. Times are the stall opening hours.</p>
 
       {loading && <PageSpinner />}

@@ -2,39 +2,56 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { api } from "../../api/client";
 import type { Product } from "../../api/models";
+import { ImageManager } from "../../components/ImageManager";
 import { Label, inp } from "../../components/inputs";
 import { ProductImage } from "../../components/ProductImage";
 import { Button, Card, Notice, PageSpinner } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
 import { rupees } from "../../utils/format";
 
-type F = { name: string; category: string; price: string; description: string; image_url: string; is_available: boolean };
-const EMPTY: F = { name: "", category: "Nankhatai", price: "", description: "", image_url: "", is_available: true };
+type F = { name: string; category: string; price: string; description: string; is_available: boolean };
+const EMPTY: F = { name: "", category: "Nankhatai", price: "", description: "", is_available: true };
 
 export function AdminProducts() {
   const { data, loading, error, reload } = useLoad(() => api.get<Product[]>("/products/admin/all"), []);
   const [editing, setEditing] = useState<Product | "new" | null>(null);
   const [f, setF] = useState<F>(EMPTY);
+  const [pending, setPending] = useState<File[]>([]);
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState<{ kind: "error" | "success"; text: string } | null>(null);
   const items = data ?? [];
 
   function open(p: Product | "new") {
     setEditing(p);
+    setPending([]);
     setMsg(null);
-    setF(p === "new" ? EMPTY : { name: p.name, category: p.category, price: String(Number(p.price)), description: p.description ?? "", image_url: p.image_url ?? "", is_available: p.is_available });
+    setF(p === "new" ? EMPTY : { name: p.name, category: p.category, price: String(Number(p.price)), description: p.description ?? "", is_available: p.is_available });
   }
 
   async function save(e: FormEvent) {
     e.preventDefault();
     if (f.name.trim().length < 2 || f.category.trim().length < 2) return setMsg({ kind: "error", text: "Name and category need at least 2 characters." });
     if (!(Number(f.price) > 0)) return setMsg({ kind: "error", text: "Enter a price above 0." });
-    const body = { name: f.name.trim(), category: f.category.trim(), price: f.price, description: f.description.trim() || null, image_url: f.image_url.trim() || null, is_available: f.is_available };
+    const body = { name: f.name.trim(), category: f.category.trim(), price: f.price, description: f.description.trim() || null, is_available: f.is_available };
     setBusy("form");
     setMsg(null);
     try {
-      if (editing === "new") await api.post("/products", body);
-      else if (editing) await api.patch(`/products/${editing.id}`, body);
+      let saved: Product | null = editing === "new" ? null : editing;
+      if (editing === "new") saved = await api.post<Product>("/products", body);
+      else if (editing) saved = await api.patch<Product>(`/products/${editing.id}`, body);
+      if (pending.length && saved) {
+        const fd = new FormData();
+        pending.forEach((file) => fd.append("files", file));
+        try {
+          await api.post<Product>(`/products/${saved.id}/images`, fd);
+        } catch (err) {
+          setEditing(saved);
+          setMsg({ kind: "error", text: `Product saved, but the images were not uploaded: ${err instanceof Error ? err.message : "upload failed"}. Try again.` });
+          reload();
+          return;
+        }
+      }
+      setPending([]);
       setEditing(null);
       setMsg({ kind: "success", text: "Product saved." });
       reload();
@@ -54,6 +71,23 @@ export function AdminProducts() {
       reload();
     } catch (err) {
       setMsg({ kind: "error", text: err instanceof Error ? err.message : "Update failed." });
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function imageAction(id: string, action: "cover" | "remove") {
+    if (!editing || editing === "new") return;
+    if (action === "remove" && !window.confirm("Remove this image?")) return;
+    setBusy("img");
+    setMsg(null);
+    try {
+      const url = `/products/${editing.id}/images/${id}`;
+      const next = action === "cover" ? await api.put<Product>(`${url}/cover`) : await api.del<Product>(url);
+      setEditing(next);
+      reload();
+    } catch (err) {
+      setMsg({ kind: "error", text: err instanceof Error ? err.message : "Image update failed." });
     } finally {
       setBusy("");
     }
@@ -79,7 +113,17 @@ export function AdminProducts() {
               <datalist id="cats">{[...new Set(items.map((p) => p.category))].map((c) => <option key={c} value={c} />)}</datalist>
             </Label>
             <Label text="Price (INR)"><input className={inp} inputMode="decimal" value={f.price} onChange={(e) => set("price", e.target.value)} required /></Label>
-            <Label text="Image URL (optional, leave empty for the illustration)"><input className={inp} type="url" value={f.image_url} maxLength={500} onChange={(e) => set("image_url", e.target.value)} /></Label>
+            <div className="md:col-span-2">
+              <ImageManager
+                existing={editing && editing !== "new" ? editing.images ?? [] : []}
+                pending={pending}
+                onPick={(files) => setPending((cur) => [...cur, ...files])}
+                onRemovePending={(i) => setPending((cur) => cur.filter((_, k) => k !== i))}
+                onCover={(id) => imageAction(id, "cover")}
+                onRemove={(id) => imageAction(id, "remove")}
+                busy={busy === "img"}
+              />
+            </div>
             <div className="md:col-span-2"><Label text="Description"><textarea className={inp} rows={3} value={f.description} onChange={(e) => set("description", e.target.value)} /></Label></div>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.is_available} onChange={(e) => set("is_available", e.target.checked)} /> Available to order</label>
             <div className="flex gap-3 md:col-span-2">
